@@ -183,7 +183,7 @@ export default function App() {
             <h1>Samidha Rane</h1>
             <p className="words"><span key={word}>{WORDS[word]}</span></p>
             <p className="lede">I'm a computer science graduate from Goa. I like making things that people can really use, like mobile apps and websites.</p>
-            <div className="now-pill"><span className="dot" /> Open to internships right now</div>
+            <div className="now-pill"><span className="dot" /> Open to internships and Full-time Job right now</div>
             <div className="btns">
               <a className="btn main" href="#projects">See my work</a>
               <a className="btn" href="#contact">Say hello</a>
