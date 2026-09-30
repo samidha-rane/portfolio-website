@@ -2,13 +2,53 @@ import { useEffect, useRef, useState } from 'react'
 
 const IMG = '/images/'
 const WORDS = ['I build apps.', 'I make videos.', 'I keep learning new things.']
+const EMAIL = 'samidharane05@gmail.com'
+
+const ICONS = {
+  sun: <><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></>,
+  moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />,
+  phone: <><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M12 18h.01" /></>,
+  film: <><rect x="2" y="2" width="20" height="20" rx="2.18" /><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5" /></>,
+  award: <><circle cx="12" cy="8" r="7" /><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12" /></>,
+  shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
+  book: <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />,
+  code: <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" />,
+  globe: <><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></>,
+  database: <><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></>,
+  tool: <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />,
+  layers: <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />,
+  users: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
+  x: <path d="M18 6L6 18M6 6l12 12" />,
+  menu: <path d="M3 12h18M3 6h18M3 18h18" />,
+  up: <path d="M12 19V5M5 12l7-7 7 7" />,
+  ext: <path d="M7 17L17 7M7 7h10v10" />,
+  download: <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />,
+  copy: <><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></>,
+  check: <path d="M20 6L9 17l-5-5" />,
+}
+
+function Icon({ n, size = 20 }) {
+  return (
+    <svg className="ic" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {ICONS[n]}
+    </svg>
+  )
+}
 
 const SKILLS = [
-  ['Programming', ['Java', 'JavaScript', 'Kotlin', 'C++']],
-  ['Websites', ['React', 'Node.js', 'Express', 'HTML', 'CSS', 'REST APIs']],
-  ['Data', ['SQL', 'Firebase', 'Room', 'SQLite']],
-  ['Tools', ['Git', 'GitHub', 'Android Studio', 'VS Code', 'Postman']],
-  ['Also', ['Botpress chatbots', 'OOP', 'DSA', 'Testing']],
+  ['Programming Languages', 'code', ['Java', 'JavaScript', 'Kotlin', 'C++']],
+  ['Core Concepts', 'layers', ['OOP', 'Data Structures', 'DSA', 'SDLC']],
+  ['Web Technologies', 'globe', ['React.js', 'Node.js', 'Express.js', 'HTML5', 'CSS3', 'REST API']],
+  ['Database', 'database', ['SQL', 'Firebase Firestore', 'Room Database']],
+  ['Tools & Methodologies', 'tool', ['Git', 'GitHub', 'VS Code', 'Android Studio', 'Postman', 'Agile', 'Unit Testing', 'Integration Testing', 'Debugging']],
+  ['Soft Skills', 'users', ['Communication', 'Teamwork', 'Problem Solving', 'Time Management', 'Documentation']],
+]
+
+const EDUCATION = [
+  { when: '2023 – 2026', title: 'BSc in Computer Science', where: "St. Xavier's College, Mapusa, Goa",
+    text: 'Favourite subject: Data Structures and Algorithms. Received an academic excellence award for my third-year results.' },
+  { when: 'Class 12', title: 'HSC (12th Standard)', where: 'B. M. Gogte College, Shiroda, Maharashtra', score: '61.33%' },
+  { when: 'Class 10', title: 'SSC (10th Standard)', where: 'Shri Mauli Vidyamandir, Redi, Maharashtra', score: '86%' },
 ]
 
 const PROJECTS = [
@@ -19,7 +59,7 @@ const PROJECTS = [
     shots: ['impact-home.png', 'impact-checkin.png', 'impact-profile.png', 'impact-settings.png'] },
   { cat: 'Web', title: 'SplitEasy', tint: 'peach',
     text: 'A website to split expenses with friends. Make a group, add what you spent, and it shows who owes whom.',
-    tech: ['React', 'Node.js', 'Express', 'SQL'],
+    tech: ['React', 'Node.js', 'Express', 'JWT', 'SQL'],
     links: [['Live site', 'https://expense-splitter-six-gray.vercel.app'], ['Code', 'https://github.com/samidha-rane/expense-splitter']] },
   { cat: 'Web', title: 'Product manager + online store', tint: 'sky',
     text: 'A tool to manage product details. When I add a product here, it shows up in a real WooCommerce store by itself.',
@@ -57,7 +97,11 @@ const CERTS = [
   ['award-xaviers.jpg', 'Academic Excellence Award', "St. Xavier's College, 2025–26"],
 ]
 
-const EMAIL = 'samidharane05@gmail.com'
+const ABOUT = [
+  ['book', 'My studies', "BSc Computer Science at St. Xavier's College, Mapusa, Goa (2023–2026). I received an excellence award for my third-year results."],
+  ['shield', 'NCC Cadet', 'I was in the NCC for 3 years and hold the A, B and C certificates.'],
+  ['film', 'Video maker', 'I make short videos and reels. It is my creative break from coding.'],
+]
 
 function Reveal({ children, delay = 0, className = '' }) {
   const ref = useRef(null)
@@ -145,7 +189,6 @@ export default function App() {
     try {
       await navigator.clipboard.writeText(EMAIL)
     } catch {
-      // fallback for browsers/contexts where the clipboard API is unavailable
       const ta = document.createElement('textarea')
       ta.value = EMAIL
       document.body.appendChild(ta)
@@ -161,15 +204,15 @@ export default function App() {
     <>
       <div className="progress" style={{ width: prog + '%' }} />
       <div className="glow" />
-      {zoom && <div className="lightbox" onClick={() => setZoom(null)}><img src={zoom} alt="" /><button aria-label="Close">✕</button></div>}
-      {egg && <div className="egg">✨ You found the secret! Thanks for looking closely. ✨</div>}
+      {zoom && <div className="lightbox" onClick={() => setZoom(null)}><img src={zoom} alt="" /><button aria-label="Close"><Icon n="x" size={20} /></button></div>}
+      {egg && <div className="egg">You found the secret! Thanks for looking closely.</div>}
       <nav className={scrolled ? 'nav scrolled' : 'nav'}>
         <div className="wrap nav-in">
           <a className="logo" href="#top" onClick={hitLogo}>Samidha</a>
-          <button className="theme-btn" onClick={() => setDark(d => !d)} aria-label="Toggle theme">{dark ? '☀️' : '🌙'}</button>
-          <button className="burger" onClick={() => setMenu(!menu)} aria-label="Menu">{menu ? '✕' : '☰'}</button>
+          <button className="theme-btn" onClick={() => setDark(d => !d)} aria-label="Toggle theme"><Icon n={dark ? 'sun' : 'moon'} size={18} /></button>
+          <button className="burger" onClick={() => setMenu(!menu)} aria-label="Menu"><Icon n={menu ? 'x' : 'menu'} size={24} /></button>
           <div className={menu ? 'links open' : 'links'}>
-            {['About', 'Skills', 'Projects', 'Certificates', 'Contact'].map(l =>
+            {['About', 'Education', 'Skills', 'Projects', 'Certificates', 'Contact'].map(l =>
               <a key={l} href={`#${l.toLowerCase()}`} onClick={go}>{l}</a>)}
           </div>
         </div>
@@ -192,7 +235,9 @@ export default function App() {
           <div className="photo-area">
             <div className="ring" />
             <div className="photo"><span>S</span><img src={IMG + 'photo.png'} alt="Samidha" onError={e => e.currentTarget.remove()} /></div>
-            <span className="sticker s1">📱 Apps</span><span className="sticker s2">🎬 Videos</span><span className="sticker s3">🎖️ NCC</span>
+            <span className="sticker s1"><Icon n="phone" size={16} /> Apps</span>
+            <span className="sticker s2"><Icon n="film" size={16} /> Videos</span>
+            <span className="sticker s3"><Icon n="award" size={16} /> NCC</span>
           </div>
         </div>
       </header>
@@ -207,10 +252,8 @@ export default function App() {
           <div><b><Count to={4} /></b><span>Languages I code in</span></div>
         </div></Reveal>
         <div className="cards3">
-          {[['🎓', 'My studies', "BSc Computer Science at St. Xavier's College, Mapusa, Goa (2023–2026). I received an excellence award for my third-year results."],
-            ['🎖️', 'NCC Cadet', 'I was in the NCC for 3 years and hold the A, B and C certificates.'],
-            ['🎬', 'Video maker', 'I make short videos and reels. It is my creative break from coding.']].map(([e, t, d], i) =>
-            <Reveal key={t} delay={i * 120}><div className="soft-card"><span className="emoji">{e}</span><h3>{t}</h3><p>{d}</p></div></Reveal>)}
+          {ABOUT.map(([ic, t, d], i) =>
+            <Reveal key={t} delay={i * 120}><div className="soft-card"><span className="ico"><Icon n={ic} size={22} /></span><h3>{t}</h3><p>{d}</p></div></Reveal>)}
         </div>
         <Reveal delay={200}><button className="fact-card" onClick={() => setFact(f => (f + 1) % FACTS.length)}>
           <span className="fact-label">A quick fact about me — click for another</span>
@@ -218,18 +261,37 @@ export default function App() {
         </button></Reveal>
       </div></section>
 
-      <section id="skills" className="tint"><div className="wrap">
-        <Title>My skills</Title>
-        <div className="skill-grid">
-          {SKILLS.map(([name, list], i) =>
-            <Reveal key={name} delay={i * 90}>
-              <div className="skill-box"><h4>{name}</h4>
-                <div className="chips">{list.map(s => <span key={s} className="chip">{s}</span>)}</div></div>
+      <section id="education" className="tint"><div className="wrap">
+        <Title>Education</Title>
+        <div className="timeline">
+          {EDUCATION.map((e, i) =>
+            <Reveal key={e.title} delay={i * 100}>
+              <div className="tl-item">
+                <p className="tl-when">{e.when}</p>
+                <h3>{e.title}</h3>
+                <p className="tl-where">{e.where}</p>
+                {e.score && <span className="tl-score">{e.score}</span>}
+                {e.text && <p>{e.text}</p>}
+              </div>
             </Reveal>)}
         </div>
       </div></section>
 
-      <section id="projects"><div className="wrap">
+      <section id="skills"><div className="wrap">
+        <Title>My skills</Title>
+        <div className="skill-grid">
+          {SKILLS.map(([name, ic, list], i) =>
+            <Reveal key={name} delay={i * 90}>
+              <div className="skill-box">
+                <span className="ico"><Icon n={ic} size={22} /></span>
+                <h4>{name}</h4>
+                <div className="chips">{list.map(s => <span key={s} className="chip">{s}</span>)}</div>
+              </div>
+            </Reveal>)}
+        </div>
+      </div></section>
+
+      <section id="projects" className="tint"><div className="wrap">
         <Title>My projects</Title>
         <Reveal><div className="tabs">{['All', 'Android', 'Web', 'Data'].map(f =>
           <button key={f} className={filter === f ? 'tab on' : 'tab'} onClick={() => setFilter(f)}>{f}</button>)}</div></Reveal>
@@ -242,17 +304,17 @@ export default function App() {
                 {p.mine && <p className="mine"><b>What I did:</b> {p.mine}</p>}
                 <div className="chips small">{p.tech.map(t => <span key={t} className="chip">{t}</span>)}</div>
                 {p.shots && <div className="shots">{p.shots.map(s => <img key={s} className="zoomable" onClick={() => setZoom(IMG + s)} src={IMG + s} alt={p.title + ' screen'} loading="lazy" />)}</div>}
-                {p.links && <div className="plinks">{p.links.map(([n, u]) => <a key={n} href={u} target="_blank" rel="noreferrer">{n} →</a>)}</div>}
+                {p.links && <div className="plinks">{p.links.map(([n, u]) => <a key={n} href={u} target="_blank" rel="noreferrer">{n} <Icon n="ext" size={14} /></a>)}</div>}
               </article></Tilt>
             </Reveal>)}
         </div>
       </div></section>
 
-      <section className="tint"><div className="wrap two">
+      <section><div className="wrap two">
         <Reveal><div className="feature">
           <h3>My videos</h3>
           <p>Along with coding, I make short videos. Telling a story in one minute teaches you to keep things clear and simple.</p>
-          <a className="btn main" href="https://drive.google.com/drive/folders/133qHYz9otyPSZ0XponxX4-K6UcGE0GgH?usp=sharing" target="_blank" rel="noreferrer">Watch my videos</a>
+          <a className="btn main" href="https://drive.google.com/drive/folders/133qHYz9otyPSZ0XponxX4-K6UcGE0GgH?usp=sharing" target="_blank" rel="noreferrer">Watch my videos <Icon n="ext" size={16} /></a>
         </div></Reveal>
         <Reveal delay={140}><div className="feature">
           <h3>My internship</h3>
@@ -260,7 +322,7 @@ export default function App() {
         </div></Reveal>
       </div></section>
 
-      <section id="certificates"><div className="wrap">
+      <section id="certificates" className="tint"><div className="wrap">
         <Title>Certificates and awards</Title>
         <div className="cert-grid">
           {CERTS.map(([img, t, d], i) =>
@@ -268,23 +330,23 @@ export default function App() {
         </div>
       </div></section>
 
-      <section id="contact" className="tint"><div className="wrap">
+      <section id="contact"><div className="wrap">
         <Reveal><div className="contact">
           <h2>Get in touch</h2>
           <p>I am looking for an internship or a first job. Send me a message any time.</p>
           <div className="email-row">
             <a className="btn main" href={`mailto:${EMAIL}`} onClick={() => { setBurst(true); setTimeout(() => setBurst(false), 1200) }}>{EMAIL}</a>
-            <button className="btn" onClick={copyEmail}>{copied ? 'Copied ✓' : 'Copy email'}</button>
+            <button className="btn" onClick={copyEmail}><Icon n={copied ? 'check' : 'copy'} size={16} />{copied ? 'Copied' : 'Copy email'}</button>
           </div>
-          {burst && <div className="confetti">{Array.from({ length: 16 }).map((_, i) => <span key={i} style={{ '--i': i }}>🎉</span>)}</div>}
-          <p className="phone">+91 7350182844 · <a href="/resume.pdf" download>Download resume ↓</a></p>
+          {burst && <div className="confetti">{Array.from({ length: 16 }).map((_, i) => <span key={i} style={{ '--i': i }} />)}</div>}
+          <p className="phone">+91 7350182844 · <a className="dl" href="/resume.pdf" download>Download resume <Icon n="download" size={15} /></a></p>
           <div className="plinks center">
             <a href="https://github.com/samidha-rane" target="_blank" rel="noreferrer">GitHub</a>
             <a href="https://www.linkedin.com/in/samidha-rane-0892ba345/" target="_blank" rel="noreferrer">LinkedIn</a>
           </div>
         </div></Reveal>
       </div></section>
-      {top && <a className="totop" href="#top" aria-label="Back to top">↑</a>}
+      {top && <a className="totop" href="#top" aria-label="Back to top"><Icon n="up" size={22} /></a>}
       <footer>© 2026 Samidha Rane</footer>
     </>
   )
