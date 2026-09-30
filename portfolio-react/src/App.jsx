@@ -36,12 +36,32 @@ function Icon({ n, size = 20 }) {
 }
 
 const SKILLS = [
-  ['Programming Languages', 'code', ['Java', 'JavaScript', 'Kotlin', 'C++']],
-  ['Core Concepts', 'layers', ['OOP', 'Data Structures', 'DSA', 'SDLC']],
-  ['Web Technologies', 'globe', ['React.js', 'Node.js', 'Express.js', 'HTML5', 'CSS3', 'REST API']],
-  ['Database', 'database', ['SQL', 'Firebase Firestore', 'Room Database']],
-  ['Tools & Methodologies', 'tool', ['Git', 'GitHub', 'VS Code', 'Android Studio', 'Postman', 'Agile', 'Unit Testing', 'Integration Testing', 'Debugging']],
-  ['Soft Skills', 'users', ['Communication', 'Teamwork', 'Problem Solving', 'Time Management', 'Documentation']],
+  ['Programming', 'code', [
+    ['Java', 'Build Android apps and write clean object-oriented code using classes, inheritance and data structures.', 'IMPACT, Restaurant Ordering App'],
+    ['Kotlin', 'Build Android screens and features, like the dashboard and the phone-usage tracking.', 'IMPACT'],
+    ['JavaScript', 'Make websites interactive and write server-side logic that connects a page to its data.', 'SplitEasy, Strava Connect'],
+    ['C++', 'Solve problems with data structures and algorithms.'],
+    ['Python', 'Collect data from APIs and CSV files, clean it with Pandas and produce clear reports.', 'Data Cleaner'],
+  ]],
+  ['Web development', 'globe', [
+    ['React', 'Build the front end of a full web app: components, state, forms and pages.', 'SplitEasy, this portfolio'],
+    ['Node.js and Express', 'Build REST APIs with secure login (JWT and bcrypt) and connect them to a database.', 'SplitEasy, Product manager'],
+    ['HTML and CSS', 'Turn a design into a responsive page that works on phones and laptops.'],
+    ['REST APIs', 'Design endpoints and connect separate systems, like sending products to a WooCommerce store or logging in with Strava.', 'Product manager, Strava Connect'],
+  ]],
+  ['Databases', 'database', [
+    ['SQL', 'Design tables and relations, and write queries, for example to calculate who owes whom in a group.', 'SplitEasy'],
+    ['Firebase', 'Add user login and store app data in Firestore.', 'IMPACT'],
+    ['Room Database', 'Save data on the phone so an Android app keeps working offline.', 'IMPACT'],
+  ]],
+  ['Tools and practice', 'tool', [
+    ['Git and GitHub', 'Track changes, manage code in repositories and deploy to Vercel straight from GitHub.'],
+    ['Postman', 'Test REST APIs and check every request and response before connecting the front end.'],
+    ['Android Studio', 'Build, run and debug Android apps.'],
+    ['Testing and debugging', 'Write unit and integration test cases and find the cause of bugs.', 'IMPACT'],
+    ['Botpress', 'Build chatbots: plan the conversation, understand user questions and connect the bot to other tools.', 'Internship'],
+    ['Agile and SDLC', 'Work through requirements, design, coding, testing and deployment as part of a team.'],
+  ]],
 ]
 
 const EDUCATION = [
@@ -279,16 +299,20 @@ export default function App() {
 
       <section id="skills"><div className="wrap">
         <Title>My skills</Title>
-        <div className="skill-grid">
-          {SKILLS.map(([name, ic, list], i) =>
-            <Reveal key={name} delay={i * 90}>
-              <div className="skill-box">
-                <span className="ico"><Icon n={ic} size={22} /></span>
-                <h4>{name}</h4>
-                <div className="chips">{list.map(s => <span key={s} className="chip">{s}</span>)}</div>
+        {SKILLS.map(([cat, ic, items]) =>
+          <Reveal key={cat}>
+            <div className="skill-group">
+              <h3 className="sg-title"><span className="ico"><Icon n={ic} size={20} /></span>{cat}</h3>
+              <div className="skill-cards">
+                {items.map(([t, d, u]) =>
+                  <div key={t} className="skill-card">
+                    <h4>{t}</h4>
+                    <p>{d}</p>
+                    {u && <span className="used">Used in: {u}</span>}
+                  </div>)}
               </div>
-            </Reveal>)}
-        </div>
+            </div>
+          </Reveal>)}
       </div></section>
 
       <section id="projects" className="tint"><div className="wrap">
