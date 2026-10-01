@@ -21,6 +21,9 @@ const ICONS = {
   x: <path d="M18 6L6 18M6 6l12 12" />,
   menu: <path d="M3 12h18M3 6h18M3 18h18" />,
   up: <path d="M12 19V5M5 12l7-7 7 7" />,
+  search: <><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></>,
+  plus: <path d="M12 5v14M5 12h14" />,
+  trash: <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />,
   left: <path d="M15 18l-6-6 6-6" />,
   right: <path d="M9 18l6-6-6-6" />,
   expand: <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />,
@@ -119,6 +122,8 @@ const CERTS = [
   ['cert-goodspace.png', 'GoodSpace AI Assessment', 'Distinguished in Reliability, Teamwork, Honesty'],
   ['award-xaviers.jpg', 'Academic Excellence Award', "St. Xavier's College, 2025–26"],
 ]
+
+const NAV = [['About', 'about'], ['Education', 'education'], ['Skills', 'skills'], ['Projects', 'projects'], ['Try it', 'playground'], ['Certificates', 'certificates'], ['Contact', 'contact']]
 
 const SHOT_INFO = {
   'impact-home.png': ['Home dashboard', 'Screen time, unlocks and the most used app at a glance.'],
@@ -250,6 +255,195 @@ function CertShowcase({ items, onZoom }) {
   )
 }
 
+function SplitDemo() {
+  const [people, setPeople] = useState(['Asha', 'Ravi', 'Meera'])
+  const [exps, setExps] = useState([
+    { id: 1, desc: 'Dinner', amount: 1800, payer: 'Asha', among: ['Asha', 'Ravi', 'Meera'] },
+    { id: 2, desc: 'Cab', amount: 600, payer: 'Ravi', among: ['Asha', 'Ravi', 'Meera'] },
+  ])
+  const [desc, setDesc] = useState('')
+  const [amt, setAmt] = useState('')
+  const [payer, setPayer] = useState('Asha')
+  const [skip, setSkip] = useState([])
+  const [name, setName] = useState('')
+
+  const fmt = n => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+  const among = people.filter(p => !skip.includes(p))
+
+  const add = () => {
+    const a = parseFloat(amt)
+    if (!(a > 0) || !among.length) return
+    setExps(e => [...e, { id: Date.now(), desc: desc.trim() || 'Expense', amount: a, payer, among }])
+    setDesc(''); setAmt('')
+  }
+  const addPerson = () => {
+    const n = name.trim()
+    if (!n || people.includes(n) || people.length >= 6) return
+    setPeople(p => [...p, n]); setName('')
+  }
+  const toggle = p => setSkip(s => (s.includes(p) ? s.filter(x => x !== p) : [...s, p]))
+
+  const bal = {}
+  people.forEach(p => { bal[p] = 0 })
+  exps.forEach(e => {
+    const share = e.amount / e.among.length
+    bal[e.payer] += e.amount
+    e.among.forEach(a => { bal[a] -= share })
+  })
+  const cr = Object.entries(bal).filter(([, v]) => v > 0.01).sort((a, b) => b[1] - a[1])
+  const de = Object.entries(bal).filter(([, v]) => v < -0.01).map(([n, v]) => [n, -v]).sort((a, b) => b[1] - a[1])
+  const pay = []
+  let i = 0, j = 0
+  while (i < de.length && j < cr.length) {
+    const m = Math.min(de[i][1], cr[j][1])
+    pay.push([de[i][0], cr[j][0], m])
+    de[i][1] -= m; cr[j][1] -= m
+    if (de[i][1] < 0.01) i++
+    if (cr[j][1] < 0.01) j++
+  }
+  const total = exps.reduce((t, e) => t + e.amount, 0)
+
+  return (
+    <div className="split">
+      <div className="split-card">
+        <h3>Add an expense</h3>
+        <div className="fld"><label>What was it for?</label><input value={desc} onChange={e => setDesc(e.target.value)} placeholder="Dinner, cab, tickets" /></div>
+        <div className="row">
+          <div className="fld"><label>Amount (₹)</label><input type="number" min="0" value={amt} onChange={e => setAmt(e.target.value)} placeholder="500" onKeyDown={e => e.key === 'Enter' && add()} /></div>
+          <div className="fld"><label>Paid by</label><select value={payer} onChange={e => setPayer(e.target.value)}>{people.map(p => <option key={p}>{p}</option>)}</select></div>
+        </div>
+        <div className="fld"><label>Split between (tap to include or exclude)</label>
+          <div className="pick">{people.map(p => <button key={p} type="button" className={skip.includes(p) ? 'pill' : 'pill on'} onClick={() => toggle(p)}>{p}</button>)}</div>
+        </div>
+        <button className="btn main full" onClick={add}><Icon n="plus" size={16} /> Add expense</button>
+        <div className="fld addp">
+          <label>Add a friend ({people.length}/6)</label>
+          <div className="inline"><input value={name} onChange={e => setName(e.target.value)} placeholder="Name" onKeyDown={e => e.key === 'Enter' && addPerson()} /><button className="btn" onClick={addPerson}>Add</button></div>
+        </div>
+      </div>
+
+      <div className="split-card">
+        <h3>Who owes whom</h3>
+        {pay.length === 0
+          ? <p className="muted">Everyone is settled up.</p>
+          : <ul className="settle">{pay.map(([f, t, m]) => <li key={f + t}><b>{f}</b> pays <b>{t}</b><span className="amt">{fmt(m)}</span></li>)}</ul>}
+        <div className="bals">{people.map(p => (
+          <div key={p} className="bal"><span>{p}</span><span className={bal[p] >= 0.01 ? 'pos' : bal[p] <= -0.01 ? 'neg' : ''}>{bal[p] >= 0.01 ? 'gets back ' + fmt(bal[p]) : bal[p] <= -0.01 ? 'owes ' + fmt(-bal[p]) : 'settled'}</span></div>
+        ))}</div>
+        <div className="exp-head"><span>Expenses</span><span>Total {fmt(total)}</span></div>
+        <ul className="exps">{exps.map(e => (
+          <li key={e.id}>
+            <div><b>{e.desc}</b><small>{e.payer} paid · split {e.among.length} way{e.among.length > 1 ? 's' : ''}</small></div>
+            <span className="amt">{fmt(e.amount)}</span>
+            <button className="icon-btn" aria-label="Delete expense" onClick={() => setExps(x => x.filter(y => y.id !== e.id))}><Icon n="trash" size={16} /></button>
+          </li>
+        ))}</ul>
+      </div>
+    </div>
+  )
+}
+
+const TERM_CMDS = ['about', 'skills', 'education', 'projects', 'contact', 'resume', 'clear']
+
+function Terminal() {
+  const [lines, setLines] = useState([
+    { t: 'out', x: 'Hi, I am Samidha. Type a command or tap one below.' },
+    { t: 'out', x: 'Try: about, skills, projects. Type help to see everything.' },
+  ])
+  const [v, setV] = useState('')
+  const box = useRef(null)
+  const inp = useRef(null)
+  useEffect(() => { if (box.current) box.current.scrollTop = box.current.scrollHeight }, [lines])
+
+  const out = c => {
+    switch (c) {
+      case 'help': return ['Commands: ' + TERM_CMDS.join(', ')]
+      case 'about': return ['Samidha Rane, BSc Computer Science graduate from Goa.', 'I build Android apps and full-stack websites, and I make short videos.', 'Open to internships and full-time jobs.']
+      case 'skills': return SKILLS.map(([n, , items]) => `${n}: ${items.map(i => i[0]).join(', ')}`)
+      case 'education': return EDUCATION.map(e => `${e.when}  ${e.title}, ${e.where}${e.score ? ' (' + e.score + ')' : ''}`)
+      case 'projects': return PROJECTS.map(p => `${p.title}  [${p.tech.join(', ')}]`)
+      case 'contact': return [EMAIL, '+91 7350182844', 'github.com/samidha-rane', 'linkedin.com/in/samidha-rane-0892ba345']
+      case 'resume': { const a = document.createElement('a'); a.href = '/resume.pdf'; a.download = ''; a.click(); return ['Downloading resume.pdf ...'] }
+      default: return [`command not found: ${c}. Type help.`]
+    }
+  }
+  const run = raw => {
+    const c = raw.trim().toLowerCase()
+    if (!c) return
+    if (c === 'clear') { setLines([]); return }
+    setLines(l => [...l, { t: 'cmd', x: c }, ...out(c).map(x => ({ t: 'out', x }))])
+  }
+
+  return (
+    <div className="term">
+      <div className="term-bar"><i /><i /><i /><span>samidha@portfolio: ~</span></div>
+      <div className="term-body" ref={box} onClick={() => inp.current && inp.current.focus()}>
+        {lines.map((l, k) => <p key={k} className={l.t}>{l.t === 'cmd' ? <><span className="ps">$</span>{l.x}</> : l.x}</p>)}
+        <div className="term-in">
+          <span className="ps">$</span>
+          <input ref={inp} value={v} onChange={e => setV(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { run(v); setV('') } }} placeholder="type a command" spellCheck="false" autoCapitalize="none" autoComplete="off" aria-label="Terminal command" />
+        </div>
+      </div>
+      <div className="term-chips">{TERM_CMDS.map(c => <button key={c} onClick={() => run(c)}>{c}</button>)}</div>
+    </div>
+  )
+}
+
+function GitHubLive() {
+  const [d, setD] = useState(null)
+  const [err, setErr] = useState(false)
+  useEffect(() => {
+    let off = false
+    const get = u => fetch(u).then(r => (r.ok ? r.json() : Promise.reject()))
+    Promise.all([
+      get('https://api.github.com/users/samidha-rane'),
+      get('https://api.github.com/users/samidha-rane/repos?sort=updated&per_page=12'),
+    ]).then(([u, r]) => { if (!off) setD({ u, r: r.filter(x => !x.fork).slice(0, 4) }) })
+      .catch(() => { if (!off) setErr(true) })
+    return () => { off = true }
+  }, [])
+  if (err) return null
+  return (
+    <div className="gh">
+      <div className="gh-head">
+        <div><span className="eyebrow">LIVE FROM GITHUB</span><h3>What I have been building lately</h3></div>
+        {d && <div className="gh-stats"><div><b>{d.u.public_repos}</b><span>repos</span></div><div><b>{d.u.followers}</b><span>followers</span></div></div>}
+      </div>
+      {!d ? <p className="muted">Loading from GitHub...</p> : (
+        <div className="gh-grid">{d.r.map(r => (
+          <a key={r.id} href={r.html_url} target="_blank" rel="noreferrer" className="gh-repo">
+            <b>{r.name}</b>
+            <p>{r.description || 'No description yet.'}</p>
+            <span className="gh-meta">{r.language && <i>{r.language}</i>}<i>Updated {new Date(r.pushed_at).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}</i></span>
+          </a>
+        ))}</div>
+      )}
+    </div>
+  )
+}
+
+function Palette({ items, onClose }) {
+  const [q, setQ] = useState('')
+  const [idx, setIdx] = useState(0)
+  const list = items.filter(a => a.label.toLowerCase().includes(q.toLowerCase()))
+  const run = a => { onClose(); a.run() }
+  const key = e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setIdx(v => Math.min(v + 1, list.length - 1)) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setIdx(v => Math.max(v - 1, 0)) }
+    else if (e.key === 'Enter' && list[idx]) run(list[idx])
+  }
+  return (
+    <div className="pal-wrap" onClick={onClose}>
+      <div className="pal" onClick={e => e.stopPropagation()}>
+        <input autoFocus value={q} onChange={e => { setQ(e.target.value); setIdx(0) }} onKeyDown={key} placeholder="Where do you want to go?" />
+        <ul>{list.map((a, k) => <li key={a.label} className={k === idx ? 'on' : ''} onMouseEnter={() => setIdx(k)} onClick={() => run(a)}>{a.label}</li>)}
+          {list.length === 0 && <li>Nothing found</li>}</ul>
+        <div className="pal-hint">Arrow keys to move, Enter to open, Esc to close</div>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [word, setWord] = useState(0)
   const [menu, setMenu] = useState(false)
@@ -264,6 +458,8 @@ export default function App() {
   const [egg, setEgg] = useState(false)
   const [burst, setBurst] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [pal, setPal] = useState(false)
+  const [active, setActive] = useState('')
 
   useEffect(() => {
     const t = setInterval(() => setWord(w => (w + 1) % WORDS.length), 2600)
@@ -275,14 +471,24 @@ export default function App() {
       setProg(max > 0 ? (window.scrollY / max) * 100 : 0)
     }
     const m = e => { const r = document.documentElement.style; r.setProperty('--mx', e.clientX + 'px'); r.setProperty('--my', e.clientY + 'px') }
-    const k = e => e.key === 'Escape' && setZoom(null)
+    const k = e => {
+      if (e.key === 'Escape') { setZoom(null); setPal(false) }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPal(p => !p) }
+    }
     window.addEventListener('scroll', s); window.addEventListener('mousemove', m); window.addEventListener('keydown', k)
     return () => { clearInterval(t); window.removeEventListener('scroll', s); window.removeEventListener('mousemove', m); window.removeEventListener('keydown', k) }
   }, [])
 
   useEffect(() => { document.documentElement.dataset.theme = dark ? '' : 'light' }, [dark])
 
+  useEffect(() => {
+    const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && setActive(e.target.id)), { rootMargin: '-45% 0px -50% 0px' })
+    NAV.forEach(([, id]) => { const el = document.getElementById(id); if (el) io.observe(el) })
+    return () => io.disconnect()
+  }, [])
+
   const go = () => setMenu(false)
+  const jump = id => { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth' }) }
 
   const hitLogo = () => {
     const n = clicks + 1
@@ -305,20 +511,31 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const actions = [
+    ...NAV.map(([l, id]) => ({ label: `Go to ${l}`, run: () => jump(id) })),
+    { label: 'Switch between light and dark theme', run: () => setDark(d => !d) },
+    { label: 'Copy email address', run: copyEmail },
+    { label: 'Download resume', run: () => { const a = document.createElement('a'); a.href = '/resume.pdf'; a.download = ''; a.click() } },
+    { label: 'Open GitHub', run: () => window.open('https://github.com/samidha-rane', '_blank', 'noreferrer') },
+    { label: 'Open LinkedIn', run: () => window.open('https://www.linkedin.com/in/samidha-rane-0892ba345/', '_blank', 'noreferrer') },
+  ]
+
   return (
     <>
       <div className="progress" style={{ width: prog + '%' }} />
       <div className="glow" />
       {zoom && <div className="lightbox" onClick={() => setZoom(null)}><img src={zoom} alt="" /><button aria-label="Close"><Icon n="x" size={20} /></button></div>}
+      {pal && <Palette items={actions} onClose={() => setPal(false)} />}
       {egg && <div className="egg">You found the secret! Thanks for looking closely.</div>}
       <nav className={scrolled ? 'nav scrolled' : 'nav'}>
         <div className="wrap nav-in">
           <a className="logo" href="#top" onClick={hitLogo}>Samidha</a>
           <button className="theme-btn" onClick={() => setDark(d => !d)} aria-label="Toggle theme"><Icon n={dark ? 'sun' : 'moon'} size={18} /></button>
+          <button className="cmd-btn" onClick={() => setPal(true)} aria-label="Quick search"><Icon n="search" size={16} /><kbd>Ctrl K</kbd></button>
           <button className="burger" onClick={() => setMenu(!menu)} aria-label="Menu"><Icon n={menu ? 'x' : 'menu'} size={24} /></button>
           <div className={menu ? 'links open' : 'links'}>
-            {['About', 'Education', 'Skills', 'Projects', 'Certificates', 'Contact'].map(l =>
-              <a key={l} href={`#${l.toLowerCase()}`} onClick={go}>{l}</a>)}
+            {NAV.map(([l, id]) =>
+              <a key={id} href={`#${id}`} className={active === id ? 'active' : ''} onClick={go}>{l}</a>)}
           </div>
         </div>
       </nav>
@@ -421,9 +638,21 @@ export default function App() {
               </article></Tilt>
             </Reveal>)}
         </div>
+        <Reveal><GitHubLive /></Reveal>
       </div></section>
 
-      <section><div className="wrap two">
+      <section id="playground"><div className="wrap">
+        <Title no="05">Try it yourself</Title>
+        <Reveal><p className="about-text">A small working version of the idea behind my SplitEasy project. Add an expense, change who shares it, and watch the balances update.</p></Reveal>
+        <Reveal><SplitDemo /></Reveal>
+        <Reveal>
+          <h3 className="sub-h">Or talk to my terminal</h3>
+          <p className="muted">Type a command, or tap one of the buttons.</p>
+          <Terminal />
+        </Reveal>
+      </div></section>
+
+      <section className="tint"><div className="wrap two">
         <Reveal><div className="feature">
           <h3>My videos</h3>
           <p>Along with coding, I make short videos. Telling a story in one minute teaches you to keep things clear and simple.</p>
@@ -435,12 +664,12 @@ export default function App() {
         </div></Reveal>
       </div></section>
 
-      <section id="certificates" className="tint"><div className="wrap">
-        <Title no="05">Certificates and awards</Title>
+      <section id="certificates"><div className="wrap">
+        <Title no="06">Certificates and awards</Title>
         <Reveal><CertShowcase items={CERTS} onZoom={setZoom} /></Reveal>
       </div></section>
 
-      <section id="contact"><div className="wrap">
+      <section id="contact" className="tint"><div className="wrap">
         <Reveal><div className="contact">
           <h2>Get in touch</h2>
           <p>I am looking for an internship or a first job. Send me a message any time.</p>
