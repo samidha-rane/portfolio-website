@@ -6,8 +6,8 @@
   --sky:#0F3A7A;--line:#1B3563
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-padding-top:72px}
-body{background:var(--bg);color:var(--ink);font-family:'Work Sans',sans-serif;line-height:1.7;font-size:17px;overflow-x:hidden}
+html{scroll-behavior:smooth;scroll-padding-top:72px;overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font-family:'Work Sans',sans-serif;line-height:1.7;font-size:17px;overflow-x:hidden;overflow-x:clip;max-width:100%}
 h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.12}
 a{color:inherit}img{max-width:100%;display:block}
 .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
@@ -196,7 +196,7 @@ footer{text-align:center;padding:34px;color:var(--soft);font-size:.9rem;backgrou
 .marquee-track span::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--sage-d)}
 @keyframes scroll{to{transform:translateX(calc(-50% - 22px))}}
 
-.flow-wrap{margin-top:26px;perspective:1400px;user-select:none}
+.flow-wrap{margin-top:26px;padding:8px 0 4px;perspective:1400px;user-select:none;overflow:hidden;overflow:clip}
 .flow{position:relative;height:min(540px,118vw)}
 .flow-item{position:absolute;top:0;left:50%;height:100%;aspect-ratio:.47;padding:0;border:0;background:#000;border-radius:26px;overflow:hidden;cursor:pointer;
   transform:translateX(calc(-50% + var(--o) * 74%)) scale(calc(1 - var(--a) * .17)) rotateY(calc(var(--o) * -14deg));
@@ -229,3 +229,11 @@ footer{text-align:center;padding:34px;color:var(--soft);font-size:.9rem;backgrou
 .th{width:74px;height:56px;padding:0;border:2px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;cursor:pointer;opacity:.6;transition:.3s}
 .th.on{border-color:var(--sage-d);opacity:1;transform:translateY(-3px)}
 .th img{width:100%;height:100%;object-fit:cover}
+
+.hero-in>*,.cert-show>*,.proj-grid>*,.two>*,.cards3>*{min-width:0}
+@media(max-width:700px){
+  .flow-item{transform:translateX(calc(-50% + var(--o) * 62%)) scale(calc(1 - var(--a) * .2)) rotateY(calc(var(--o) * -12deg))}
+  .flow{height:min(470px,108vw)}
+  .proj{padding:22px}
+  .cert-stage{transform:none;padding:12px}
+}
