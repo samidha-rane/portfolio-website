@@ -21,6 +21,9 @@ const ICONS = {
   x: <path d="M18 6L6 18M6 6l12 12" />,
   menu: <path d="M3 12h18M3 6h18M3 18h18" />,
   up: <path d="M12 19V5M5 12l7-7 7 7" />,
+  left: <path d="M15 18l-6-6 6-6" />,
+  right: <path d="M9 18l6-6-6-6" />,
+  expand: <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />,
   ext: <path d="M7 17L17 7M7 7h10v10" />,
   download: <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />,
   copy: <><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></>,
@@ -117,6 +120,15 @@ const CERTS = [
   ['award-xaviers.jpg', 'Academic Excellence Award', "St. Xavier's College, 2025–26"],
 ]
 
+const SHOT_INFO = {
+  'impact-home.png': ['Home dashboard', 'Screen time, unlocks and the most used app at a glance.'],
+  'impact-checkin.png': ['Daily check-in', 'Log your mood, sleep and productivity every day.'],
+  'impact-profile.png': ['Profile', 'Your stats, streaks and wellness identity in one place.'],
+  'impact-settings.png': ['Settings', 'Journal entry, daily reminder and account options.'],
+}
+
+const MARQUEE = ['Java', 'Kotlin', 'JavaScript', 'React', 'Node.js', 'Express', 'SQL', 'Firebase', 'Android', 'Python', 'Git', 'REST APIs']
+
 const ABOUT = [
   ['book', 'My studies', "BSc Computer Science at St. Xavier's College, Mapusa, Goa (2023–2026). I received an excellence award for my third-year results."],
   ['shield', 'NCC Cadet', 'I was in the NCC for 3 years and hold the A, B and C certificates.'],
@@ -134,12 +146,13 @@ function Reveal({ children, delay = 0, className = '' }) {
   return <div ref={ref} className={`reveal ${on ? 'in' : ''} ${className}`} style={{ transitionDelay: `${delay}ms` }}>{children}</div>
 }
 
-function Title({ children }) {
-  return <Reveal><h2>{children}</h2></Reveal>
+function Title({ children, no }) {
+  return <Reveal>{no && <span className="eyebrow">{no}</span>}<h2>{children}</h2></Reveal>
 }
 
-function Tilt({ children }) {
+function Tilt({ children, on = true }) {
   const ref = useRef(null)
+  if (!on) return <div className="tilt">{children}</div>
   const move = e => {
     const r = ref.current.getBoundingClientRect()
     const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5
@@ -163,6 +176,78 @@ function Count({ to }) {
     return () => io.disconnect()
   }, [to])
   return <span ref={ref}>{n}</span>
+}
+
+function PhoneCarousel({ shots, onZoom }) {
+  const [i, setI] = useState(0)
+  const [hold, setHold] = useState(false)
+  const touch = useRef(0)
+  const n = shots.length
+  const go = d => setI(v => (v + d + n) % n)
+  useEffect(() => {
+    if (hold) return
+    const t = setInterval(() => setI(v => (v + 1) % n), 3800)
+    return () => clearInterval(t)
+  }, [hold, n])
+  const [title, desc] = SHOT_INFO[shots[i]] || ['', '']
+  return (
+    <div className="flow-wrap" onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)}
+      onTouchStart={e => { touch.current = e.touches[0].clientX }}
+      onTouchEnd={e => { const d = e.changedTouches[0].clientX - touch.current; if (Math.abs(d) > 40) go(d < 0 ? 1 : -1) }}>
+      <div className="flow">
+        {shots.map((s, k) => {
+          const h = Math.floor(n / 2)
+          const o = ((k - i + n + h) % n) - h
+          return (
+            <button key={s} className={o === 0 ? 'flow-item on' : 'flow-item'} style={{ '--o': o, '--a': Math.abs(o) }}
+              onClick={() => (o === 0 ? onZoom(IMG + s) : setI(k))} aria-label={SHOT_INFO[s] ? SHOT_INFO[s][0] : 'Screen'}>
+              <img src={IMG + s} alt="" loading="lazy" draggable="false" />
+            </button>
+          )
+        })}
+      </div>
+      <div className="flow-info" key={i}><h4>{title}</h4><p>{desc}</p></div>
+      <div className="flow-ctrl">
+        <button aria-label="Previous screen" onClick={() => go(-1)}><Icon n="left" size={20} /></button>
+        <div className="dots">{shots.map((s, k) => <button key={s} className={k === i ? 'dot-b on' : 'dot-b'} aria-label={`Screen ${k + 1}`} onClick={() => setI(k)} />)}</div>
+        <button aria-label="Next screen" onClick={() => go(1)}><Icon n="right" size={20} /></button>
+      </div>
+    </div>
+  )
+}
+
+function CertShowcase({ items, onZoom }) {
+  const [i, setI] = useState(0)
+  const [hold, setHold] = useState(false)
+  const n = items.length
+  useEffect(() => {
+    if (hold) return
+    const t = setInterval(() => setI(v => (v + 1) % n), 5000)
+    return () => clearInterval(t)
+  }, [hold, n])
+  const [img, title, desc] = items[i]
+  return (
+    <div className="cert-show" onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)}>
+      <div className="cert-stage">
+        <button className="cert-img" key={img} onClick={() => onZoom(IMG + img)} aria-label={`View ${title}`}>
+          <img src={IMG + img} alt={title} />
+          <span className="zoom-hint"><Icon n="expand" size={16} /> View full size</span>
+        </button>
+      </div>
+      <div className="cert-info">
+        <span className="cert-no">{String(i + 1).padStart(2, '0')} / {String(n).padStart(2, '0')}</span>
+        <h3 key={title}>{title}</h3>
+        <p>{desc}</p>
+        <div className="cert-thumbs">
+          {items.map(([im, t], k) => <button key={im} className={k === i ? 'th on' : 'th'} onClick={() => setI(k)} aria-label={t}><img src={IMG + im} alt="" loading="lazy" /></button>)}
+        </div>
+        <div className="flow-ctrl left">
+          <button aria-label="Previous certificate" onClick={() => setI((i - 1 + n) % n)}><Icon n="left" size={20} /></button>
+          <button aria-label="Next certificate" onClick={() => setI((i + 1) % n)}><Icon n="right" size={20} /></button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function App() {
@@ -262,8 +347,12 @@ export default function App() {
         </div>
       </header>
 
+      <div className="marquee" aria-hidden="true">
+        <div className="marquee-track">{[...MARQUEE, ...MARQUEE].map((m, k) => <span key={k}>{m}</span>)}</div>
+      </div>
+
       <section id="about"><div className="wrap">
-        <Title>About me</Title>
+        <Title no="01">About me</Title>
         <Reveal><p className="about-text">I finished my BSc in Computer Science in 2026. I enjoy taking a small idea and turning it into something that works and is live on the internet. I learn new tools quickly, and I like working with a team.</p></Reveal>
         <Reveal><div className="stats">
           <div><b><Count to={7} /></b><span>Projects</span></div>
@@ -282,7 +371,7 @@ export default function App() {
       </div></section>
 
       <section id="education" className="tint"><div className="wrap">
-        <Title>Education</Title>
+        <Title no="02">Education</Title>
         <div className="timeline">
           {EDUCATION.map((e, i) =>
             <Reveal key={e.title} delay={i * 100}>
@@ -298,7 +387,7 @@ export default function App() {
       </div></section>
 
       <section id="skills"><div className="wrap">
-        <Title>My skills</Title>
+        <Title no="03">My skills</Title>
         {SKILLS.map(([cat, ic, items]) =>
           <Reveal key={cat}>
             <div className="skill-group">
@@ -316,18 +405,18 @@ export default function App() {
       </div></section>
 
       <section id="projects" className="tint"><div className="wrap">
-        <Title>My projects</Title>
+        <Title no="04">My projects</Title>
         <Reveal><div className="tabs">{['All', 'Android', 'Web', 'Data'].map(f =>
           <button key={f} className={filter === f ? 'tab on' : 'tab'} onClick={() => setFilter(f)}>{f}</button>)}</div></Reveal>
         <div className="proj-grid">
           {PROJECTS.filter(p => filter === 'All' || p.cat === filter).map((p, i) =>
             <Reveal key={p.title} delay={(i % 2) * 120} className={p.shots ? 'wide' : ''}>
-              <Tilt><article className={`proj ${p.tint}`}>
+              <Tilt on={!p.shots}><article className={`proj ${p.tint}`}>
                 <h3>{p.title} {p.tag && <em className="tag">{p.tag}</em>}</h3>
                 <p>{p.text}</p>
                 {p.mine && <p className="mine"><b>What I did:</b> {p.mine}</p>}
                 <div className="chips small">{p.tech.map(t => <span key={t} className="chip">{t}</span>)}</div>
-                {p.shots && <div className="shots">{p.shots.map(s => <img key={s} className="zoomable" onClick={() => setZoom(IMG + s)} src={IMG + s} alt={p.title + ' screen'} loading="lazy" />)}</div>}
+                {p.shots && <PhoneCarousel shots={p.shots} onZoom={setZoom} />}
                 {p.links && <div className="plinks">{p.links.map(([n, u]) => <a key={n} href={u} target="_blank" rel="noreferrer">{n} <Icon n="ext" size={14} /></a>)}</div>}
               </article></Tilt>
             </Reveal>)}
@@ -347,11 +436,8 @@ export default function App() {
       </div></section>
 
       <section id="certificates" className="tint"><div className="wrap">
-        <Title>Certificates and awards</Title>
-        <div className="cert-grid">
-          {CERTS.map(([img, t, d], i) =>
-            <Reveal key={t} delay={i * 120}><figure className="cert"><img className="zoomable" onClick={() => setZoom(IMG + img)} src={IMG + img} alt={t} loading="lazy" /><figcaption><b>{t}</b><span>{d}</span></figcaption></figure></Reveal>)}
-        </div>
+        <Title no="05">Certificates and awards</Title>
+        <Reveal><CertShowcase items={CERTS} onZoom={setZoom} /></Reveal>
       </div></section>
 
       <section id="contact"><div className="wrap">
